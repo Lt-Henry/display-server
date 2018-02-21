@@ -24,8 +24,9 @@ Drm::Drm(const char* path)
     connector_type[DRM_MODE_CONNECTOR_eDP] = "eDP";
     connector_type[DRM_MODE_CONNECTOR_HDMIA] = "hdmi";
     connector_type[DRM_MODE_CONNECTOR_HDMIB] = "hdmi";
+    connector_type[DRM_MODE_CONNECTOR_VIRTUAL] = "virtual";
     
-    connector_status[0] = "Disconnected";
+    connector_status[2] = "Disconnected";
     connector_status[1] = "Connected";
 
 
@@ -46,11 +47,10 @@ Drm::Drm(const char* path)
     clog<<"connectors:"<<res.count_connectors<<endl;
     clog<<"framebuffers:"<<res.count_fbs<<endl;
     
-    
-    uint64_t res_crtc_buf[10]={0};
-    uint64_t res_conn_buf[10]={0};
-    uint64_t res_fb_buf[10]={0};
-    uint64_t res_enc_buf[10]={0};
+    uint32_t res_conn_buf[10]={0};
+    uint32_t res_crtc_buf[10]={0};
+    uint32_t res_fb_buf[10]={0};
+    uint32_t res_enc_buf[10]={0};
     
     res.crtc_id_ptr=(uint64_t)res_crtc_buf;
     res.connector_id_ptr=(uint64_t)res_conn_buf;
@@ -58,6 +58,7 @@ Drm::Drm(const char* path)
     res.encoder_id_ptr=(uint64_t)res_enc_buf;
     
     ioctl(fd, DRM_IOCTL_MODE_GETRESOURCES, &res);
+    
     
     clog<<"connectors:"<<endl;
     
@@ -75,7 +76,7 @@ Drm::Drm(const char* path)
         clog<<"    connection: "<<connector_status[conn.connection]<<endl;
         
         struct drm_mode_modeinfo conn_mode_buf[20]={0};
-        uint64_t conn_prop_buf[20]={0},
+        uint32_t conn_prop_buf[20]={0},
             conn_propval_buf[20]={0},
             conn_enc_buf[20]={0};
             
