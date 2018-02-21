@@ -1,26 +1,36 @@
 
 
-#ifndef DS_DRM
-#define DS_DRM
+#ifndef DS_GPU
+#define DS_GPU
 
 #include <map>
 #include <string>
+#include <vector>
+
+#include "connector.hpp"
 
 namespace ds
 {
-    class Drm
+    namespace drm
     {
-        public:
+        class Gpu
+        {
+            public:
+            
+            static std::vector<std::string> get_cards();
+            
+            int fd;
+            
+            std::map<int,std::string> connector_type;
+            std::map<int,std::string> connector_status;
+            
+            Gpu(std::string path);
+            ~Gpu();
+            
+            std::vector<Connector> get_connectors();
         
-        int fd;
-        
-        std::map<int,std::string> connector_type;
-        std::map<int,std::string> connector_status;
-        
-        Drm(const char* path);
-        ~Drm();
-    
-    };
+        };
+    }
 }
 
 #endif
