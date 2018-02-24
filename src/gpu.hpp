@@ -27,7 +27,20 @@ namespace ds
             Gpu(std::string path);
             ~Gpu();
             
+            /*!
+                Get a list of connectors
+            */
             std::vector<Connector> get_connectors();
+            
+            /*!
+                Become master
+            */
+            void set_master();
+            
+            /*!
+                Drop master
+            */
+            void drop_master();
         
         };
     }

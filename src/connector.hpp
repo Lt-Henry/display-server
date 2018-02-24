@@ -25,6 +25,12 @@ namespace ds
             ~Connector();
             
             void update();
+            
+            bool is_connected();
+            
+            std::string get_type_name();
+            
+            void get_modes();
         };
     }
 }

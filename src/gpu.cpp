@@ -42,14 +42,6 @@ Gpu::Gpu(string path)
     clog<<"card0:"<<endl;
     clog<<"fd:"<<fd<<endl;
     
-    // become master
-    ioctl(fd, DRM_IOCTL_SET_MASTER, 0);
-    
-
-
-    
-    // drop master
-    ioctl(fd, DRM_IOCTL_DROP_MASTER, 0);
 }
 
 Gpu::~Gpu()
@@ -62,9 +54,7 @@ vector<Connector> Gpu::get_connectors()
     vector<Connector> connectors;
     struct drm_mode_card_res res={0};
     
-    // become master
-    ioctl(fd, DRM_IOCTL_SET_MASTER, 0);
-
+    set_master();
     
     ioctl(fd, DRM_IOCTL_MODE_GETRESOURCES, &res);
     
@@ -84,16 +74,24 @@ vector<Connector> Gpu::get_connectors()
         ioctl(fd, DRM_IOCTL_MODE_GETRESOURCES, &res);
         
         for (size_t n=0;n<res.count_connectors;n++) {
-            clog<<"··"<<ids[n]<<endl;
             connectors.push_back(Connector(fd,ids[n]));
         }
         
         delete [] ids;
     }
     
-    // drop master
-    ioctl(fd, DRM_IOCTL_DROP_MASTER, 0);
+    drop_master();
     
     return connectors;
+}
+
+void Gpu::set_master()
+{
+    ioctl(fd, DRM_IOCTL_SET_MASTER, 0);
+}
+
+void Gpu::drop_master()
+{
+    ioctl(fd, DRM_IOCTL_DROP_MASTER, 0);
 }
 
