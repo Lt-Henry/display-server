@@ -3,6 +3,9 @@
 #define DS_CONNECTOR
 
 #include <cstdint>
+#include <vector>
+
+#include "encoder.hpp"
 
 namespace ds
 {
@@ -31,6 +34,8 @@ namespace ds
             std::string get_type_name();
             
             void get_modes();
+            
+            std::vector<Encoder> get_encoders();
         };
     }
 }

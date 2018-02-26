@@ -31,6 +31,17 @@ int main(int argc,char* argv[])
         clog<<"Found one valid output"<<endl;
     
         main_output->get_modes();
+        
+        vector<Encoder> encoders;
+        
+        card.set_master();
+        encoders = main_output->get_encoders();
+        card.drop_master();
+        
+        for (Encoder & e: encoders) {
+            clog<<"[e] "<<e.get_type_name()<<endl;
+            clog<<e.crtc_id<<endl;
+        }
     }
     
     return 0;

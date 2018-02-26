@@ -1,3 +1,8 @@
+#include <fcntl.h>
+#include <sys/ioctl.h>
+#include <unistd.h>
+#include <libdrm/drm.h>
+#include <libdrm/drm_mode.h>
 
 #include "encoder.hpp"
 
@@ -36,9 +41,9 @@ void Encoder::update()
     struct drm_mode_get_encoder enc={0};
     
     enc.encoder_id=id;
-    ioctl(fd, DRM_IOCTL_MODE_GETENCODER, &enc)
+    ioctl(fd, DRM_IOCTL_MODE_GETENCODER, &enc);
     
-    type=enc.type;
+    type=enc.encoder_type;
     crtc_id=enc.crtc_id;
     
 }

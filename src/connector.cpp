@@ -96,3 +96,27 @@ void Connector::get_modes()
     
     delete [] modeinfos;
 }
+
+vector<Encoder> Connector::get_encoders()
+{
+    vector<Encoder> encoders;
+    
+    struct drm_mode_get_connector conn={0};
+    uint32_t* buffer;
+    
+    buffer = new uint32_t[this->encoders];
+    
+    conn.connector_id=this->id;
+    ioctl(fd, DRM_IOCTL_MODE_GETCONNECTOR, &conn);
+    
+    conn.encoders_ptr=(uint64_t)buffer;
+    ioctl(fd, DRM_IOCTL_MODE_GETCONNECTOR, &conn);
+    
+    for (int n=0;n<this->encoders;n++) {
+        encoders.push_back(Encoder(fd,buffer[n]));
+    }
+    
+    delete [] buffer;
+    
+    return encoders;
+}
