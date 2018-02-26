@@ -14,27 +14,10 @@
 using namespace std;
 using namespace ds::drm;
 
-vector<string> Gpu::get_cards()
-{
-    vector<string> cards;
-    
-    return cards;
-}
 
 Gpu::Gpu(string path)
 {
 
-    // init strings
-    
-    connector_type[DRM_MODE_CONNECTOR_Unknown] = "unknown";
-    connector_type[DRM_MODE_CONNECTOR_VGA] = "vga";
-    connector_type[DRM_MODE_CONNECTOR_eDP] = "eDP";
-    connector_type[DRM_MODE_CONNECTOR_HDMIA] = "hdmi";
-    connector_type[DRM_MODE_CONNECTOR_HDMIB] = "hdmi";
-    connector_type[DRM_MODE_CONNECTOR_VIRTUAL] = "virtual";
-    
-    connector_status[2] = "Disconnected";
-    connector_status[1] = "Connected";
 
 
     fd = open(path.c_str(),O_RDWR | O_CLOEXEC);
@@ -93,5 +76,41 @@ void Gpu::set_master()
 void Gpu::drop_master()
 {
     ioctl(fd, DRM_IOCTL_DROP_MASTER, 0);
+}
+
+void Gpu::update()
+{
+    struct drm_mode_card_res res={0};
+    
+    uint32_t* fb_buf;
+    uint32_t* crtc_buf;
+    uint32_t* connector_buf;
+    
+    ioctl(fd, DRM_IOCTL_MODE_GETRESOURCES, &res);
+    
+    
+    // frame buffers
+    fb_ids.clear();
+    
+    if (res.count_fbs>0) {
+        fb_buf = new uint32_t[res.count_fbs];
+    }
+    
+    // crtcs
+    crtc_ids.clear();
+    
+    if (res.count_crtcs>0) {
+        crtc_buf = new uint32_t[res.count_crtcs];
+    }
+    
+    // connectors
+    connector_ids.clear();
+    
+    if (res.count_connectors>0) {
+        connector_buf = new uint32_t[res.count_connectors];
+    }
+    
+    delete [] fb_buf;
+    
 }
 

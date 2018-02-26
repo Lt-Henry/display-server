@@ -17,12 +17,13 @@ namespace ds
         {
             public:
             
-            static std::vector<std::string> get_cards();
             
             int fd;
             
-            std::map<int,std::string> connector_type;
-            std::map<int,std::string> connector_status;
+            std::vector<uint32_t> fb_ids;
+            std::vector<uint32_t> crtc_ids;
+            std::vector<uint32_t> encoder_ids;
+            std::vector<uint32_t> connector_ids;
             
             Gpu(std::string path);
             ~Gpu();
@@ -41,6 +42,8 @@ namespace ds
                 Drop master
             */
             void drop_master();
+            
+            void update();
         
         };
     }
