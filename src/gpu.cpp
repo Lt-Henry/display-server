@@ -18,8 +18,6 @@ using namespace ds::drm;
 Gpu::Gpu(string path)
 {
 
-
-
     fd = open(path.c_str(),O_RDWR | O_CLOEXEC);
     
     clog<<"card0:"<<endl;
@@ -35,35 +33,10 @@ Gpu::~Gpu()
 vector<Connector> Gpu::get_connectors()
 {
     vector<Connector> connectors;
-    struct drm_mode_card_res res={0};
     
-    set_master();
-    
-    ioctl(fd, DRM_IOCTL_MODE_GETRESOURCES, &res);
-    
-    if (res.count_connectors>0) {
-    
-        uint32_t res_fb_buf[10]={0},
-        res_crtc_buf[10]={0},
-        res_enc_buf[10]={0};
-
-        res.fb_id_ptr=(uint64_t)res_fb_buf;
-        res.crtc_id_ptr=(uint64_t)res_crtc_buf;
-        res.encoder_id_ptr=(uint64_t)res_enc_buf;
-    
-        uint32_t* ids = new uint32_t[res.count_connectors];
-        res.connector_id_ptr=(uint64_t)ids;
-        
-        ioctl(fd, DRM_IOCTL_MODE_GETRESOURCES, &res);
-        
-        for (size_t n=0;n<res.count_connectors;n++) {
-            connectors.push_back(Connector(fd,ids[n]));
-        }
-        
-        delete [] ids;
+    for (uint32_t id : connector_ids) {
+        connectors.push_back(fd,id);
     }
-    
-    drop_master();
     
     return connectors;
 }
@@ -82,9 +55,10 @@ void Gpu::update()
 {
     struct drm_mode_card_res res={0};
     
-    uint32_t* fb_buf;
-    uint32_t* crtc_buf;
-    uint32_t* connector_buf;
+    uint32_t* fb_buf = nullptr;
+    uint32_t* crtc_buf = nullptr;
+    uint32_t* connector_buf = nullptr;
+    uint32_t* encoder_buf = nullptr;
     
     ioctl(fd, DRM_IOCTL_MODE_GETRESOURCES, &res);
     
@@ -110,7 +84,49 @@ void Gpu::update()
         connector_buf = new uint32_t[res.count_connectors];
     }
     
-    delete [] fb_buf;
+    // encoders
+    encoders_ids.clear();
     
+    if (res.count_encoders>0) {
+        encoder_buf = new uint32_t[res.count_encoders];
+    }
+    
+    res.fb_id_ptr=(uint64_t)fb_buf;
+    res.crtc_id_ptr=(uint64_t)crtc_buf;
+    res.connector_id_ptr=(uint64_t)connector_buf;
+    res.encoder_id_ptr=(uint64_t)encoder_buf;
+    
+
+    if (res.count_fbs>0) {
+        for (size_t n=0;n<res.count_fbs;n++) {
+            fb_ids.push_back(fb_buf[n]);
+        }
+        
+        delete [] fb_buf;
+    }
+    
+    if (res.count_crtcs>0) {
+        for (size_t n=0;n<res.count_crtcs;n++) {
+            crtc_ids.push_back(crtc_buf[n]);
+        }
+        
+        delete [] crtc_buf;
+    }
+    
+    if (res.count_connectors>0) {
+        for (size_t n=0;n<res.count_connectors;n++) {
+            connector_ids.push_back(connector_buf[n]);
+        }
+        
+        delete [] connector_buf;
+    }
+    
+    if (res.count_encoders>0) {
+        for (size_t n=0;n<res.count_encoders;n++) {
+            encoder_ids.push_back(encoder_buf[n]);
+        }
+        
+        delete [] encoder_buf;
+    }
 }
 

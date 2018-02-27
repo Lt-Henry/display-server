@@ -43,6 +43,9 @@ namespace ds
             */
             void drop_master();
             
+            /*!
+                Update resource counters
+            */
             void update();
         
         };

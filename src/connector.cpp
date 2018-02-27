@@ -60,12 +60,43 @@ void Connector::update()
 
     conn.connector_id=this->id;
     ioctl(fd, DRM_IOCTL_MODE_GETCONNECTOR, &conn);
-
     
     type=conn.connector_type;
-    encoders=conn.count_encoders;
-    modes=conn.count_modes;
     connection=conn.connection;
+    encoder_id=conn.encoder_id;
+    
+    uint32_t* encoder_buf = nullptr;
+    struct drm_mode_modeinfo* modeinfo_buf = nullptr;
+    uint32_t* prop_buf = nullptr;
+    uint32_t* prop_value_buf = nullptr;
+    
+    encoder_ids.clear();
+    
+    if (conn.count_encoders>0) {
+        encoder_buf = new uint32_t[conn.count_encoders];
+    }
+    
+    modes.clear();
+    
+    if (conn.count_modes>0) {
+        modeinfo_buf = new struct drm_mode_modeinfo[conn.count_modes];
+    }
+    
+    prop_ids.clear();
+    prop_value_ids.clear();
+    
+    if (conn.count_props>0) {
+        prop_buf = new uint32_t[conn.count_props];
+        prop_value_buf = new uint32_t[conn.count_props];
+    }
+    
+    conn.modes_ptr=(uint64_t)modeinfo_buf;
+    conn.props_ptr=(uint64_t)prop_buf;
+    conn.prop_values_ptr=(uint64_t)prop_value_buf;
+    conn.encoders_ptr=(uint64_t)encoder_buf;
+    
+    ioctl(dri_fd, DRM_IOCTL_MODE_GETCONNECTOR, &conn)
+    
 }
 
 bool Connector::is_connected()

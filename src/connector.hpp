@@ -5,6 +5,8 @@
 #include <cstdint>
 #include <vector>
 
+#include <libdrm/drm_mode.h>
+
 #include "encoder.hpp"
 
 namespace ds
@@ -20,8 +22,13 @@ namespace ds
             
             uint32_t type;
             uint32_t connection;
-            uint32_t encoders;
-            uint32_t modes;
+            uint32_t encoder_id;
+            
+            std::vector<uint32_t> encoder_ids;
+            std::vector<struct drm_mode_modeinfo> modes;
+            std::vector<uint32_t> prop_ids;
+            std::vector<uint32_t> prop_value_ids;
+            
             
             Connector();
             Connector(int fd,uint32_t id);
