@@ -60,6 +60,7 @@ void Connector::update()
 
     conn.connector_id=this->id;
     ioctl(fd, DRM_IOCTL_MODE_GETCONNECTOR, &conn);
+    clog<<this->id<<endl;
     
     type=conn.connector_type;
     connection=conn.connection;
@@ -95,7 +96,28 @@ void Connector::update()
     conn.prop_values_ptr=(uint64_t)prop_value_buf;
     conn.encoders_ptr=(uint64_t)encoder_buf;
     
-    ioctl(dri_fd, DRM_IOCTL_MODE_GETCONNECTOR, &conn)
+    ioctl(fd, DRM_IOCTL_MODE_GETCONNECTOR, &conn);
+    
+    if (conn.count_encoders>0) {
+    
+        for (size_t n=0;n<conn.count_encoders;n++) {
+            encoder_ids.push_back(encoder_buf[n]);
+        }
+    
+        delete [] encoder_buf;
+    }
+    
+    if (conn.count_modes>0) {
+        
+        for (size_t n=0;n<conn.count_modes;n++) {
+            modes.push_back(modeinfo_buf[n]);
+        }
+    }
+    
+    if (conn.count_props>0) {
+        delete [] prop_value_buf;
+        delete [] prop_buf;
+    }
     
 }
 
@@ -111,43 +133,16 @@ string Connector::get_type_name()
 
 void Connector::get_modes()
 {
-    struct drm_mode_get_connector conn={0};
-    struct drm_mode_modeinfo* modeinfos;
-    modeinfos = new struct drm_mode_modeinfo[this->modes];
-    
-    conn.connector_id=this->id;
-    ioctl(fd, DRM_IOCTL_MODE_GETCONNECTOR, &conn);
-    
-    conn.modes_ptr=(uint64_t)modeinfos;
-    ioctl(fd, DRM_IOCTL_MODE_GETCONNECTOR, &conn);
-    
-    for (int n=0;n<this->modes;n++) {
-        clog<<"m "<<modeinfos[n].name<<endl;
-    }
-    
-    delete [] modeinfos;
+
 }
 
 vector<Encoder> Connector::get_encoders()
 {
     vector<Encoder> encoders;
     
-    struct drm_mode_get_connector conn={0};
-    uint32_t* buffer;
-    
-    buffer = new uint32_t[this->encoders];
-    
-    conn.connector_id=this->id;
-    ioctl(fd, DRM_IOCTL_MODE_GETCONNECTOR, &conn);
-    
-    conn.encoders_ptr=(uint64_t)buffer;
-    ioctl(fd, DRM_IOCTL_MODE_GETCONNECTOR, &conn);
-    
-    for (int n=0;n<this->encoders;n++) {
-        encoders.push_back(Encoder(fd,buffer[n]));
+    for (uint32_t eid : encoder_ids) {
+        encoders.push_back(Encoder(fd,eid));
     }
-    
-    delete [] buffer;
     
     return encoders;
 }

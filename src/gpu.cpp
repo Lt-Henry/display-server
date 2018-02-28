@@ -35,7 +35,7 @@ vector<Connector> Gpu::get_connectors()
     vector<Connector> connectors;
     
     for (uint32_t id : connector_ids) {
-        connectors.push_back(fd,id);
+        connectors.push_back(Connector(fd,id));
     }
     
     return connectors;
@@ -62,6 +62,12 @@ void Gpu::update()
     
     ioctl(fd, DRM_IOCTL_MODE_GETRESOURCES, &res);
     
+    clog<<"--"<<endl;
+    clog<<res.count_fbs<<endl;
+    clog<<res.count_crtcs<<endl;
+    clog<<res.count_connectors<<endl;
+    clog<<res.count_encoders<<endl;
+    clog<<"--"<<endl;
     
     // frame buffers
     fb_ids.clear();
@@ -85,7 +91,7 @@ void Gpu::update()
     }
     
     // encoders
-    encoders_ids.clear();
+    encoder_ids.clear();
     
     if (res.count_encoders>0) {
         encoder_buf = new uint32_t[res.count_encoders];
@@ -95,7 +101,8 @@ void Gpu::update()
     res.crtc_id_ptr=(uint64_t)crtc_buf;
     res.connector_id_ptr=(uint64_t)connector_buf;
     res.encoder_id_ptr=(uint64_t)encoder_buf;
-    
+
+    ioctl(fd, DRM_IOCTL_MODE_GETRESOURCES, &res);
 
     if (res.count_fbs>0) {
         for (size_t n=0;n<res.count_fbs;n++) {

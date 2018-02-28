@@ -13,7 +13,13 @@ int main(int argc,char* argv[])
 
     Gpu card("/dev/dri/card0");
     
+    card.set_master();
+    card.update();
+    
+    
     vector<Connector> connectors = card.get_connectors();
+    
+    card.drop_master();
     
     Connector* main_output=nullptr;
     
@@ -34,9 +40,8 @@ int main(int argc,char* argv[])
         
         vector<Encoder> encoders;
         
-        card.set_master();
+
         encoders = main_output->get_encoders();
-        card.drop_master();
         
         for (Encoder & e: encoders) {
             clog<<"[e] "<<e.get_type_name()<<endl;
