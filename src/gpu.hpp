@@ -47,6 +47,8 @@ namespace ds
                 Update resource counters
             */
             void update();
+            
+            bool support_dumb_buffer();
         
         };
     }

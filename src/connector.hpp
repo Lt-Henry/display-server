@@ -27,7 +27,7 @@ namespace ds
             std::vector<uint32_t> encoder_ids;
             std::vector<struct drm_mode_modeinfo> modes;
             std::vector<uint32_t> prop_ids;
-            std::vector<uint32_t> prop_value_ids;
+            std::vector<uint64_t> prop_value_ids;
             
             
             Connector();
@@ -40,9 +40,11 @@ namespace ds
             
             std::string get_type_name();
             
-            void get_modes();
+            std::vector<struct drm_mode_modeinfo> get_modes();
             
             std::vector<Encoder> get_encoders();
+            
+            Encoder get_encoder();
         };
     }
 }

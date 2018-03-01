@@ -14,6 +14,11 @@ int main(int argc,char* argv[])
     Gpu card("/dev/dri/card0");
     
     card.set_master();
+    
+    if (card.support_dumb_buffer()) {
+        clog<<"Dumb buffer supported"<<endl;
+    }
+    
     card.update();
     
     
@@ -36,17 +41,17 @@ int main(int argc,char* argv[])
     if (main_output) {
         clog<<"Found one valid output"<<endl;
     
-        main_output->get_modes();
+        vector<struct drm_mode_modeinfo> modes = main_output->get_modes();
         
-        vector<Encoder> encoders;
+        Encoder encoder;
+        Crtc crtc;
         
+        encoder = main_output->get_encoder();
+        crtc = encoder.get_crtc();
 
-        encoders = main_output->get_encoders();
-        
-        for (Encoder & e: encoders) {
-            clog<<"[e] "<<e.get_type_name()<<endl;
-            clog<<e.crtc_id<<endl;
-        }
+        clog<<"Using crtc "<<crtc.id<<endl;
+        clog<<"with: "<<modes[0].hdisplay<<"x"<<modes[0].vdisplay<<endl;
+
     }
     
     return 0;

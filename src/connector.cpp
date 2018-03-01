@@ -60,7 +60,6 @@ void Connector::update()
 
     conn.connector_id=this->id;
     ioctl(fd, DRM_IOCTL_MODE_GETCONNECTOR, &conn);
-    clog<<this->id<<endl;
     
     type=conn.connector_type;
     connection=conn.connection;
@@ -69,7 +68,7 @@ void Connector::update()
     uint32_t* encoder_buf = nullptr;
     struct drm_mode_modeinfo* modeinfo_buf = nullptr;
     uint32_t* prop_buf = nullptr;
-    uint32_t* prop_value_buf = nullptr;
+    uint64_t* prop_value_buf = nullptr;
     
     encoder_ids.clear();
     
@@ -88,7 +87,7 @@ void Connector::update()
     
     if (conn.count_props>0) {
         prop_buf = new uint32_t[conn.count_props];
-        prop_value_buf = new uint32_t[conn.count_props];
+        prop_value_buf = new uint64_t[conn.count_props];
     }
     
     conn.modes_ptr=(uint64_t)modeinfo_buf;
@@ -131,9 +130,9 @@ string Connector::get_type_name()
     return string(names[type]);
 }
 
-void Connector::get_modes()
+vector<struct drm_mode_modeinfo> Connector::get_modes()
 {
-
+    return modes;
 }
 
 vector<Encoder> Connector::get_encoders()
@@ -145,4 +144,9 @@ vector<Encoder> Connector::get_encoders()
     }
     
     return encoders;
+}
+
+Encoder Connector::get_encoder()
+{
+    return Encoder(fd,encoder_id);
 }

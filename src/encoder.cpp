@@ -52,3 +52,8 @@ string Encoder::get_type_name()
 {
     return string(names[type]);
 }
+
+Crtc Encoder::get_crtc()
+{
+    return Crtc(fd,crtc_id);
+}

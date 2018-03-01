@@ -62,12 +62,6 @@ void Gpu::update()
     
     ioctl(fd, DRM_IOCTL_MODE_GETRESOURCES, &res);
     
-    clog<<"--"<<endl;
-    clog<<res.count_fbs<<endl;
-    clog<<res.count_crtcs<<endl;
-    clog<<res.count_connectors<<endl;
-    clog<<res.count_encoders<<endl;
-    clog<<"--"<<endl;
     
     // frame buffers
     fb_ids.clear();
@@ -135,5 +129,15 @@ void Gpu::update()
         
         delete [] encoder_buf;
     }
+}
+
+bool Gpu::support_dumb_buffer()
+{
+    struct drm_get_cap cap;
+    
+    cap.capability=DRM_CAP_DUMB_BUFFER;
+    ioctl(fd, DRM_IOCTL_GET_CAP, &cap);
+    
+    return (cap.value==1);
 }
 
