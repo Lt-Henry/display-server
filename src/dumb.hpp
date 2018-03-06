@@ -8,6 +8,10 @@ namespace ds
 {
     namespace drm
     {
+    
+        
+        class Gpu;
+        
         class DumbBuffer : public Surface
         {
         
@@ -16,7 +20,7 @@ namespace ds
             
             DumbBuffer();
             
-            static DumbBuffer create(int fd);
+            static DumbBuffer create(Gpu& gpu,int width,int height);
         };
         
     }
