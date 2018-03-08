@@ -2,7 +2,10 @@
 
 #include <iostream>
 
+#include <unistd.h>
+
 #include "gpu.hpp"
+#include "dumb.hpp"
 
 using namespace std;
 using namespace ds::drm;
@@ -24,7 +27,7 @@ int main(int argc,char* argv[])
     
     vector<Connector> connectors = card.get_connectors();
     
-    card.drop_master();
+    //card.drop_master();
     
     Connector* main_output=nullptr;
     
@@ -51,7 +54,23 @@ int main(int argc,char* argv[])
 
         clog<<"Using crtc "<<crtc.id<<endl;
         clog<<"with: "<<modes[0].hdisplay<<"x"<<modes[0].vdisplay<<endl;
-
+        
+        DumbBuffer dumb=DumbBuffer::create(card,modes[0].hdisplay,modes[0].vdisplay);
+        
+        crtc.add_fb(*main_output,dumb);
+        card.drop_master();
+        uint32_t* data = (uint32_t*)dumb.data;
+        
+        for (int n=0;n<0xFF;n++) {
+        
+            for (int j=0;j<400;j++) {
+                for (int i=0;i<400;i++) {
+                    data[i+j*dumb.width]=(0xff00ff00);
+                }
+            }
+            
+            usleep(1000000);
+        }
     }
     
     return 0;

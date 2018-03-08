@@ -2,12 +2,16 @@
 #ifndef DS_CRTC
 #define DS_CRTC
 
+#include "dumb.hpp"
+
 #include <cstdint>
 
 namespace ds
 {
     namespace drm
     {
+        class Connector;
+        
         class Crtc
         {
             public:
@@ -20,7 +24,7 @@ namespace ds
             
             void update();
             
-            
+            void add_fb(Connector& conn,DumbBuffer& fb);
         };
     }
 }
