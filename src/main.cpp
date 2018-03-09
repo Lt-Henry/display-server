@@ -61,17 +61,60 @@ int main(int argc,char* argv[])
         card.drop_master();
         uint32_t* data = (uint32_t*)dumb.data;
         
-        for (int n=0;n<0xFF;n++) {
+        unsigned int x=8;
+        unsigned int y=0;
         
-            for (int j=0;j<400;j++) {
-                for (int i=0;i<400;i++) {
-                    data[i+j*dumb.width]=(0xff00ff00);
+        unsigned int w=64;
+        unsigned int h=64;
+        
+        int dx=1;
+        int dy=1;
+        
+        int count=0;
+        
+        while (count<10) {
+        
+            for (int j=0;j<dumb.height;j++) {
+                for (int i=0;i<dumb.width;i++) {
+                    data[i+j*dumb.width]=0xff442266;
+                }
+            }
+        
+            if (x==0) {
+                dx=1;
+                count++;
+            }
+            
+            if (x==(dumb.width-w)) {
+                dx=-1;
+                count++;
+            }
+            
+            if (y==0) {
+                dy=1;
+                count++;
+            }
+            
+            if (y==(dumb.height-h)) {
+                dy=-1;
+                count++;
+            }
+            
+            x=x+dx;
+            y=y+dy;
+            
+            for (int j=y;j<(y+h);j++) {
+                for (int i=x;i<(x+w);i++) {
+                    data[i+j*dumb.width]=(0xff449900);
                 }
             }
             
-            usleep(1000000);
+            usleep(15000);
         }
+    
     }
+    
+    clog<<"bye"<<endl;
     
     return 0;
 }

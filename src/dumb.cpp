@@ -60,6 +60,11 @@ DumbBuffer DumbBuffer::create(Gpu& gpu,int width,int height)
     
     dumb.data = mmap(0, create_dumb.size, PROT_READ | PROT_WRITE, MAP_SHARED, dumb.fd, map_dumb.offset);
     
+    clog<<"dumb:"<<dumb.width<<"x"<<dumb.height<<endl;
+    clog<<"mapped as "<<(uint64_t)dumb.data<<endl;
+    clog<<"size: "<<create_dumb.size<<endl;
+    clog<<"pitch: "<<create_dumb.pitch<<endl;
+    
     return dumb;
 }
 
