@@ -42,6 +42,8 @@ void Crtc::add_fb(Connector& conn,DumbBuffer& fb)
     crtc.crtc_id=id;
     ioctl(fd, DRM_IOCTL_MODE_GETCRTC, &crtc);
     
+    clog<<"current crtc fb id: "<<crtc.fb_id;
+    
     crtc.fb_id=fb.id;
     crtc.set_connectors_ptr=(uint64_t)&conn_id;
     crtc.count_connectors=1;

@@ -62,6 +62,8 @@ void Gpu::update()
     
     ioctl(fd, DRM_IOCTL_MODE_GETRESOURCES, &res);
     
+    clog<<"fbs:"<<res.count_fbs<<endl;
+    
     
     // frame buffers
     fb_ids.clear();

@@ -57,6 +57,8 @@ DumbBuffer DumbBuffer::create(Gpu& gpu,int width,int height)
     
     dumb.width=create_dumb.width;
     dumb.height=create_dumb.height;
+    dumb.pitch=create_dumb.pitch;
+    dumb.size=create_dumb.size;
     
     dumb.data = mmap(0, create_dumb.size, PROT_READ | PROT_WRITE, MAP_SHARED, dumb.fd, map_dumb.offset);
     
@@ -70,5 +72,30 @@ DumbBuffer DumbBuffer::create(Gpu& gpu,int width,int height)
 
 void DumbBuffer::destroy()
 {
+    munmap(data,size);
+    
+    struct drm_mode_fb_cmd cmd_fb={0};
+    
+    cmd_fb.fb_id=id;
+    ioctl(fd,DRM_IOCTL_MODE_RMFB,&cmd_fb);
+    
+    struct drm_mode_destroy_dumb destroy_dumb={0};
+    
+    destroy_dumb.handle=handle;
+    ioctl(fd,DRM_IOCTL_MODE_DESTROY_DUMB,&destroy_dumb);
+    
+}
 
+void DumbBuffer::dirty()
+{
+    struct drm_mode_fb_dirty_cmd dirty = {0};
+    struct drm_clip_rect clip_rect = {
+        0, 0, width, height
+    };
+
+    dirty.fb_id = id;
+    dirty.clips_ptr = (uint64_t)(&clip_rect);
+    dirty.num_clips = 1;
+
+    ioctl(fd, DRM_IOCTL_MODE_DIRTYFB, &dirty);
 }

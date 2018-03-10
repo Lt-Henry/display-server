@@ -76,7 +76,7 @@ int main(int argc,char* argv[])
         
             for (int j=0;j<dumb.height;j++) {
                 for (int i=0;i<dumb.width;i++) {
-                    data[i+j*dumb.width]=0xff442266;
+                    data[i+j*dumb.pitch/4]=0xff442266;
                 }
             }
         
@@ -105,14 +105,19 @@ int main(int argc,char* argv[])
             
             for (int j=y;j<(y+h);j++) {
                 for (int i=x;i<(x+w);i++) {
-                    data[i+j*dumb.width]=(0xff449900);
+                    data[i+j*dumb.pitch/4]=(0x33443300);
                 }
             }
             
+            dumb.dirty();
             usleep(15000);
         }
+        
+        dumb.destroy();
     
     }
+    
+    
     
     clog<<"bye"<<endl;
     

@@ -20,12 +20,15 @@ namespace ds
             int fd;
             uint32_t handle;
             uint32_t id;
+            uint32_t size;
             
             DumbBuffer();
             
             static DumbBuffer create(Gpu& gpu,int width,int height);
             
             void destroy();
+            
+            void dirty();
         };
         
     }
