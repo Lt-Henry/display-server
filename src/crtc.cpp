@@ -42,7 +42,7 @@ void Crtc::add_fb(Connector& conn,DumbBuffer& fb)
     crtc.crtc_id=id;
     ioctl(fd, DRM_IOCTL_MODE_GETCRTC, &crtc);
     
-    clog<<"current crtc fb id: "<<crtc.fb_id;
+    clog<<"current crtc fb id: "<<crtc.fb_id<<endl;
     
     crtc.fb_id=fb.id;
     crtc.set_connectors_ptr=(uint64_t)&conn_id;
@@ -50,4 +50,15 @@ void Crtc::add_fb(Connector& conn,DumbBuffer& fb)
     crtc.mode=conn.modes[0];
     crtc.mode_valid=1;
     ioctl(fd, DRM_IOCTL_MODE_SETCRTC, &crtc);
+}
+
+void Crtc::page_flip(DumbBuffer& fb)
+{
+    struct drm_mode_crtc_page_flip flip = {0};
+    
+    flip.crtc_id=id;
+    flip.fb_id=fb.id;
+    flip.flags=DRM_MODE_PAGE_FLIP_ASYNC;
+    
+    ioctl(fd, DRM_IOCTL_MODE_PAGE_FLIP, &flip);
 }

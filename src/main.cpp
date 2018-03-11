@@ -1,8 +1,13 @@
 
 
 #include <iostream>
-
+#include <chrono>
 #include <unistd.h>
+
+
+#include <sys/ioctl.h>
+#include <sys/kd.h>
+#include <fcntl.h>
 
 #include "gpu.hpp"
 #include "dumb.hpp"
@@ -13,6 +18,9 @@ using namespace ds::drm;
 
 int main(int argc,char* argv[])
 {
+
+    int tty_fd = open("/dev/tty0", O_RDWR);
+    ioctl(tty_fd,KDSETMODE,KD_GRAPHICS);
 
     Gpu card("/dev/dri/card0");
     
@@ -55,11 +63,14 @@ int main(int argc,char* argv[])
         clog<<"Using crtc "<<crtc.id<<endl;
         clog<<"with: "<<modes[0].hdisplay<<"x"<<modes[0].vdisplay<<endl;
         
-        DumbBuffer dumb=DumbBuffer::create(card,modes[0].hdisplay,modes[0].vdisplay);
+        DumbBuffer b1=DumbBuffer::create(card,modes[0].hdisplay,modes[0].vdisplay);
+        DumbBuffer b2=DumbBuffer::create(card,modes[0].hdisplay,modes[0].vdisplay);
         
-        crtc.add_fb(*main_output,dumb);
-        card.drop_master();
-        uint32_t* data = (uint32_t*)dumb.data;
+        DumbBuffer* dumb=&b1;
+        
+        crtc.add_fb(*main_output,b1);
+        //card.drop_master();
+        uint32_t* data = (uint32_t*)dumb->data;
         
         unsigned int x=8;
         unsigned int y=0;
@@ -72,11 +83,15 @@ int main(int argc,char* argv[])
         
         int count=0;
         
+        int frames=0;
+        
+        auto start = chrono::steady_clock::now();
+        
         while (count<10) {
         
-            for (int j=0;j<dumb.height;j++) {
-                for (int i=0;i<dumb.width;i++) {
-                    data[i+j*dumb.pitch/4]=0xff442266;
+            for (int j=0;j<dumb->height;j++) {
+                for (int i=0;i<dumb->width;i++) {
+                    data[i+j*dumb->pitch/4]=0x31a2f2ff;
                 }
             }
         
@@ -85,7 +100,7 @@ int main(int argc,char* argv[])
                 count++;
             }
             
-            if (x==(dumb.width-w)) {
+            if (x==(dumb->width-w)) {
                 dx=-1;
                 count++;
             }
@@ -95,7 +110,7 @@ int main(int argc,char* argv[])
                 count++;
             }
             
-            if (y==(dumb.height-h)) {
+            if (y==(dumb->height-h)) {
                 dy=-1;
                 count++;
             }
@@ -105,19 +120,41 @@ int main(int argc,char* argv[])
             
             for (int j=y;j<(y+h);j++) {
                 for (int i=x;i<(x+w);i++) {
-                    data[i+j*dumb.pitch/4]=(0x33443300);
+                    data[i+j*dumb->pitch/4]=(0xf7e26bff);
                 }
             }
             
-            dumb.dirty();
-            usleep(15000);
+            dumb->dirty();
+            crtc.page_flip(*dumb);
+            
+            
+            if (dumb==&b1) {
+                dumb=&b2;
+            }
+            else {
+                dumb=&b1;
+            }
+            
+            frames++;
+            
+            auto end = chrono::steady_clock::now();
+            double fpstime = chrono::duration <double, milli> (end-start).count();
+            
+            if (fpstime>1000) {
+                clog<<"* fps: "<<frames<<endl;
+                frames=0;
+                start=end;
+            }
+            //usleep(15000);
         }
         
-        dumb.destroy();
-    
+        b1.destroy();
+        b2.destroy();
     }
     
+    card.drop_master();
     
+    ioctl(tty_fd,KDSETMODE,KD_TEXT);
     
     clog<<"bye"<<endl;
     
