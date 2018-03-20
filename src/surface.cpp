@@ -1,6 +1,7 @@
 
 #include "surface.hpp"
 
+#include <cmath>
 
 using namespace std;
 using namespace ds;
@@ -38,9 +39,73 @@ void Surface::destroy()
 
 void Surface::fill(uint32_t pixel)
 {
+    
+    for (int j=0;j<height;j++) {
+    
+        uint8_t* base = data+(j*pitch);
+        uint32_t* pixmap =(uint32_t*)base;
 
+        for (int i=0;i<width;i++) {
+            pixmap[i]=pixel;
+        }
+    }
 }
 
-void Surface::blit(Surface& surface,int x,int y)
+void Surface::blit(Surface& src,int x,int y)
 {
+    if (x>=width or y>=height) {
+        return;
+    }
+    
+    if ((x+src.width)<0 or (y+src.height)<0) {
+        return;
+    }
+    
+    int sx,sy,dx,dy;
+    
+    sx=0;
+    sy=0;
+    dx=x;
+    dy=y;
+    
+    if (x<0) {
+        sx=-x;
+        dx=0;
+    }
+    
+    if (y<0) {
+        sy=-y;
+        dy=0;
+    }
+    
+    int w,h;
+    
+    if ((x+src.width)<width) {
+        w=src.width;
+    }
+    else {
+        w=src.width-(x+src.width-width);
+    }
+    
+    if ((y+src.height)<height) {
+        h=src.height;
+    }
+    else {
+        h=src.height-(y+src.height-height);
+    }
+    
+    int j,jj;
+    int i,ii;
+    
+    for (j=sy,jj=dx;j<h;j++,jj++) {
+        uint8_t* source = src.data+(src.pitch*j);
+        uint8_t* dest = data+(pitch*jj);
+        
+        for (i=sx,ii=dx;i<w;i++,ii++) {
+            uint32_t* spix=(uint32_t*)source;
+            uint32_t* dpix=(uint32_t*)dest;
+            
+            dest[ii]=source[i];
+        }
+    }
 }

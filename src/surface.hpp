@@ -54,7 +54,7 @@ namespace ds
         /*!
             Blits another surface at x,y coordinates
         */
-        void blit(Surface& surface,int x,int y);
+        void blit(Surface& src,int x,int y);
     };
 }
 

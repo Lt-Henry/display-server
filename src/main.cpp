@@ -11,8 +11,10 @@
 
 #include "gpu.hpp"
 #include "dumb.hpp"
+#include "surface.hpp"
 
 using namespace std;
+using namespace ds;
 using namespace ds::drm;
 
 
@@ -63,20 +65,19 @@ int main(int argc,char* argv[])
         clog<<"Using crtc "<<crtc.id<<endl;
         clog<<"with: "<<modes[0].hdisplay<<"x"<<modes[0].vdisplay<<endl;
         
-        DumbBuffer b1=DumbBuffer::create(card,modes[0].hdisplay,modes[0].vdisplay);
-        DumbBuffer b2=DumbBuffer::create(card,modes[0].hdisplay,modes[0].vdisplay);
+        DumbBuffer b1(card,modes[0].hdisplay,modes[0].vdisplay);
+        DumbBuffer b2(card,modes[0].hdisplay,modes[0].vdisplay);
+        Surface box(64,64);
+        box.fill(0xf7e26bff);
         
         DumbBuffer* dumb=&b1;
         
         crtc.add_fb(*main_output,b1);
         //card.drop_master();
-        uint32_t* data = (uint32_t*)dumb->data;
         
-        unsigned int x=8;
-        unsigned int y=0;
+        int x=8;
+        int y=0;
         
-        unsigned int w=64;
-        unsigned int h=64;
         
         int dx=1;
         int dy=1;
@@ -89,41 +90,37 @@ int main(int argc,char* argv[])
         
         while (count<10) {
         
-            for (int j=0;j<dumb->height;j++) {
-                for (int i=0;i<dumb->width;i++) {
-                    data[i+j*dumb->pitch/4]=0x31a2f2ff;
-                }
-            }
+            dumb->fill(0xffffffff);
         
             if (x==0) {
                 dx=1;
                 count++;
+                clog<<"x"<<endl;
             }
             
-            if (x==(dumb->width-w)) {
+            if (x==dumb->width) {
                 dx=-1;
                 count++;
+                clog<<"w"<<endl;
             }
             
             if (y==0) {
                 dy=1;
                 count++;
+                clog<<"y"<<endl;
             }
             
-            if (y==(dumb->height-h)) {
+            if (y==dumb->height) {
                 dy=-1;
                 count++;
+                clog<<"h"<<endl;
             }
             
             x=x+dx;
             y=y+dy;
             
-            for (int j=y;j<(y+h);j++) {
-                for (int i=x;i<(x+w);i++) {
-                    data[i+j*dumb->pitch/4]=(0xf7e26bff);
-                }
-            }
-            
+            dumb->blit(box,x,y);
+          
             dumb->dirty();
             crtc.page_flip(*dumb);
             
@@ -145,7 +142,7 @@ int main(int argc,char* argv[])
                 frames=0;
                 start=end;
             }
-            //usleep(15000);
+            usleep(15000);
         }
         
         b1.destroy();

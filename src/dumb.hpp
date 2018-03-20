@@ -24,7 +24,7 @@ namespace ds
             
             DumbBuffer();
             
-            static DumbBuffer create(Gpu& gpu,int width,int height);
+            DumbBuffer(Gpu& gpu,int width,int height);
             
             void destroy();
             

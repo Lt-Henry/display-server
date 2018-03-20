@@ -19,11 +19,10 @@ DumbBuffer::DumbBuffer()
     handle=0;
 }
 
-DumbBuffer DumbBuffer::create(Gpu& gpu,int width,int height)
+DumbBuffer::DumbBuffer(Gpu& gpu,int width,int height)
 {
-    DumbBuffer dumb;
     
-    dumb.fd=gpu.fd;
+    fd=gpu.fd;
     
     struct drm_mode_create_dumb create_dumb={0};
     struct drm_mode_map_dumb map_dumb={0};
@@ -37,9 +36,9 @@ DumbBuffer DumbBuffer::create(Gpu& gpu,int width,int height)
     create_dumb.size = 0;
     create_dumb.handle = 0;
     
-    ioctl(dumb.fd, DRM_IOCTL_MODE_CREATE_DUMB, &create_dumb);
+    ioctl(fd, DRM_IOCTL_MODE_CREATE_DUMB, &create_dumb);
     
-    dumb.handle=create_dumb.handle;
+    handle=create_dumb.handle;
     
     cmd_dumb.width=create_dumb.width;
     cmd_dumb.height=create_dumb.height;
@@ -48,26 +47,25 @@ DumbBuffer DumbBuffer::create(Gpu& gpu,int width,int height)
     cmd_dumb.depth=24;
     cmd_dumb.handle=create_dumb.handle;
     
-    ioctl(dumb.fd,DRM_IOCTL_MODE_ADDFB,&cmd_dumb);
+    ioctl(fd,DRM_IOCTL_MODE_ADDFB,&cmd_dumb);
     
     map_dumb.handle=create_dumb.handle;
-    dumb.id=cmd_dumb.fb_id;
+    id=cmd_dumb.fb_id;
     
-    ioctl(dumb.fd,DRM_IOCTL_MODE_MAP_DUMB,&map_dumb);
+    ioctl(fd,DRM_IOCTL_MODE_MAP_DUMB,&map_dumb);
     
-    dumb.width=create_dumb.width;
-    dumb.height=create_dumb.height;
-    dumb.pitch=create_dumb.pitch;
-    dumb.size=create_dumb.size;
+    this->width=create_dumb.width;
+    this->height=create_dumb.height;
+    pitch=create_dumb.pitch;
+    size=create_dumb.size;
     
-    dumb.data = mmap(0, create_dumb.size, PROT_READ | PROT_WRITE, MAP_SHARED, dumb.fd, map_dumb.offset);
+    data = (uint8_t*)mmap(0, create_dumb.size, PROT_READ | PROT_WRITE, MAP_SHARED, fd, map_dumb.offset);
     
-    clog<<"dumb:"<<dumb.width<<"x"<<dumb.height<<endl;
-    clog<<"mapped as "<<(uint64_t)dumb.data<<endl;
+    clog<<"dumb:"<<width<<"x"<<height<<endl;
+    clog<<"mapped as "<<(uint64_t)data<<endl;
     clog<<"size: "<<create_dumb.size<<endl;
     clog<<"pitch: "<<create_dumb.pitch<<endl;
     
-    return dumb;
 }
 
 void DumbBuffer::destroy()
