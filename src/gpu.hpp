@@ -15,6 +15,11 @@ namespace ds
     {
         class Gpu
         {
+        
+            private:
+            
+            uint64_t get_capability(uint64_t cid);
+        
             public:
             
             
@@ -49,6 +54,8 @@ namespace ds
             void update();
             
             bool support_dumb_buffer();
+            
+            bool support_vsync();
         
         };
     }

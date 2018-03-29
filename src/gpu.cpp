@@ -133,13 +133,28 @@ void Gpu::update()
     }
 }
 
-bool Gpu::support_dumb_buffer()
+uint64_t Gpu::get_capability(uint64_t cid)
 {
     struct drm_get_cap cap;
     
-    cap.capability=DRM_CAP_DUMB_BUFFER;
+    cap.capability=cid;
     ioctl(fd, DRM_IOCTL_GET_CAP, &cap);
     
-    return (cap.value==1);
+    return cap.value;
+}
+
+bool Gpu::support_dumb_buffer()
+{
+    
+    uint64_t value = get_capability(DRM_CAP_DUMB_BUFFER);
+    
+    return (value==1);
+}
+
+bool Gpu::support_vsync()
+{
+    uint64_t value = get_capability(DRM_CAP_ASYNC_PAGE_FLIP);
+    
+    return (value==1);
 }
 

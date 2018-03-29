@@ -62,3 +62,18 @@ void Crtc::page_flip(DumbBuffer& fb)
     
     ioctl(fd, DRM_IOCTL_MODE_PAGE_FLIP, &flip);
 }
+
+void Crtc::vsync()
+{
+    char buffer[128];
+    int len;
+    
+    struct drm_event* event;
+    
+    len=read(fd,buffer,sizeof (struct drm_event));
+    clog<<"event size:"<<len<<endl;
+    if (len>0) {
+        event=(struct drm_event*)buffer;
+        clog<<"event: "<<event->type<<endl;
+    }
+}

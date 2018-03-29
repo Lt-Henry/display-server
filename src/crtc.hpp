@@ -27,6 +27,8 @@ namespace ds
             void add_fb(Connector& conn,DumbBuffer& fb);
             
             void page_flip(DumbBuffer& fb);
+            
+            void vsync();
         };
     }
 }

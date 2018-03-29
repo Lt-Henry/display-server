@@ -21,7 +21,7 @@ using namespace ds::drm;
 int main(int argc,char* argv[])
 {
 
-    int tty_fd = open("/dev/tty0", O_RDWR);
+    int tty_fd = open("/dev/tty", O_RDWR);
     ioctl(tty_fd,KDSETMODE,KD_GRAPHICS);
 
     Gpu card("/dev/dri/card0");
@@ -31,6 +31,11 @@ int main(int argc,char* argv[])
     if (card.support_dumb_buffer()) {
         clog<<"Dumb buffer supported"<<endl;
     }
+    
+    if (card.support_vsync()) {
+        clog<<"vsync supported"<<endl;
+    }
+    
     
     card.update();
     
@@ -124,7 +129,8 @@ int main(int argc,char* argv[])
             dumb->dirty();
             crtc.page_flip(*dumb);
             
-            
+            //crtc.vsync();
+             
             if (dumb==&b1) {
                 dumb=&b2;
             }
@@ -142,7 +148,8 @@ int main(int argc,char* argv[])
                 frames=0;
                 start=end;
             }
-            usleep(15000);
+            usleep(16000);
+           
         }
         
         b1.destroy();
@@ -152,6 +159,7 @@ int main(int argc,char* argv[])
     card.drop_master();
     
     ioctl(tty_fd,KDSETMODE,KD_TEXT);
+    close(tty_fd);
     
     clog<<"bye"<<endl;
     

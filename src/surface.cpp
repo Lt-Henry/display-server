@@ -97,7 +97,7 @@ void Surface::blit(Surface& src,int x,int y)
     int j,jj;
     int i,ii;
     
-    for (j=sy,jj=dx;j<h;j++,jj++) {
+    for (j=sy,jj=dy;j<h;j++,jj++) {
         uint8_t* source = src.data+(src.pitch*j);
         uint8_t* dest = data+(pitch*jj);
         
@@ -105,7 +105,7 @@ void Surface::blit(Surface& src,int x,int y)
             uint32_t* spix=(uint32_t*)source;
             uint32_t* dpix=(uint32_t*)dest;
             
-            dest[ii]=source[i];
+            dpix[ii]=spix[i];
         }
     }
 }
