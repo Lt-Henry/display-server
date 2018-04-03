@@ -9,6 +9,8 @@
 #include <sys/kd.h>
 #include <fcntl.h>
 
+
+#include "server.hpp"
 #include "gpu.hpp"
 #include "dumb.hpp"
 #include "surface.hpp"
@@ -21,6 +23,11 @@ using namespace ds::drm;
 int main(int argc,char* argv[])
 {
 
+    Server server;
+    
+    server.run();
+    
+    /*
     int tty_fd = open("/dev/tty", O_RDWR);
     ioctl(tty_fd,KDSETMODE,KD_GRAPHICS);
 
@@ -162,6 +169,6 @@ int main(int argc,char* argv[])
     close(tty_fd);
     
     clog<<"bye"<<endl;
-    
+    */
     return 0;
 }
