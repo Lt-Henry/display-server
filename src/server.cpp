@@ -1,6 +1,7 @@
 
 
 #include <fcntl.h>
+#include <poll.h>
 #include <sys/ioctl.h>
 #include <unistd.h>
 
@@ -26,6 +27,10 @@ void close_restricted(int fd, void *user_data)
 
 Server::Server()
 {
+
+    pointer_x=0;
+    pointer_y=0;
+
     udev = udev_new();
     
     if (!udev) {
@@ -54,8 +59,16 @@ Server::~Server()
 void Server::run()
 {
 
-    while(true) {
     
+    struct pollfd fds;
+    
+    fds.fd = libinput_get_fd(libinput);
+    fds.events = POLLIN;
+    fds.revents = 0;
+
+    while(true) {
+        poll(&fds,1,1);
+        
         libinput_dispatch(libinput);
         
         struct libinput_event* event;
@@ -64,27 +77,30 @@ void Server::run()
         
         if (event) {
             
-            clog<<"+ "<<libinput_event_get_type(event)<<endl;
+            switch (libinput_event_get_type(event)) {
+            
+                case LIBINPUT_EVENT_POINTER_MOTION_ABSOLUTE:
+                    pointer_x=libinput_event_pointer_get_absolute_x((libinput_event_pointer*)event);
+                    pointer_y=libinput_event_pointer_get_absolute_y((libinput_event_pointer*)event);
+                    
+                    clog<<"pointer "<<pointer_x<<","<<pointer_y<<endl;
+                break;
+                
+                case LIBINPUT_EVENT_POINTER_MOTION:
+                    pointer_x+=libinput_event_pointer_get_dx((libinput_event_pointer*)event);
+                    pointer_y+=libinput_event_pointer_get_dy((libinput_event_pointer*)event);
+                    
+                    clog<<"pointer "<<pointer_x<<","<<pointer_y<<endl;
+                break;
+                
+                default:
+                
+                break;
+            }
+            
             
             libinput_event_destroy(event);
         }
     }
-/*
-    struct udev_enumerate *enumerate;
-    struct udev_list_entry *devices, *dev_list_entry;
-    struct udev_device *dev;
-    
-    enumerate = udev_enumerate_new(udev);
-    udev_enumerate_add_match_subsystem(enumerate, "input");
-    udev_enumerate_scan_devices(enumerate);
-    devices = udev_enumerate_get_list_entry(enumerate);
-    
-    udev_list_entry_foreach(dev_list_entry, devices) {
-        const char* path;
-        path = udev_list_entry_get_name(dev_list_entry);
-        
-        clog<<"* "<<path<<endl;
-    }
-    
-    */
+
 }

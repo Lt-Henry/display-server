@@ -12,6 +12,9 @@ namespace ds
     
         public:
         
+        // hack hack hack
+        int pointer_x,pointer_y;
+        
         struct udev* udev;
         struct libinput* libinput;
         struct libinput_interface interface;
