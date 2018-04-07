@@ -15,6 +15,8 @@ namespace ds
         // hack hack hack
         int pointer_x,pointer_y;
         
+        bool quit_request;
+        
         struct udev* udev;
         struct libinput* libinput;
         struct libinput_interface interface;
@@ -23,6 +25,9 @@ namespace ds
         ~Server();
         
         void run();
+        
+        void set_graphic_tty();
+        void set_text_tty();
     };
 }
 
