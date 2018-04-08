@@ -1,5 +1,7 @@
 
 
+#include "server.hpp"
+
 #include <fcntl.h>
 #include <poll.h>
 #include <sys/ioctl.h>
@@ -7,10 +9,11 @@
 #include <unistd.h>
 
 #include <iostream>
+#include <stdexcept>
 
-#include "server.hpp"
 
 using namespace ds;
+using namespace ds::drm;
 using namespace std;
 
 int open_restricted(const char *path, int flags, void *user_data)
@@ -37,7 +40,7 @@ Server::Server()
     udev = udev_new();
     
     if (!udev) {
-        cerr<<"Failed to create udev object!"<<endl;
+        throw runtime_error("Failed to create udev object!");
     }
     
     struct udev_enumerate *enumerate;
@@ -57,22 +60,82 @@ Server::Server()
     }
     
     
-    interface.open_restricted=open_restricted;
-    interface.close_restricted=close_restricted;
-    
-    libinput = libinput_udev_create_context(&interface,nullptr,udev);
-    
-    if(libinput_udev_assign_seat(libinput,"seat0")!=0) {
-        cerr<<"Failed to assign seat"<<endl;
-    }
-    
-    
-    
 }
 
 Server::~Server()
 {
     
+}
+
+void Server::init(string seat)
+{
+    clog<<"* init"<<endl;
+    clog<<"* loading libinput stack"<<endl;
+    
+    interface.open_restricted=open_restricted;
+    interface.close_restricted=close_restricted;
+    
+    libinput = libinput_udev_create_context(&interface,nullptr,udev);
+    
+    if (libinput_udev_assign_seat(libinput,seat.c_str())!=0) {
+        throw runtime_error("Failed to assign seat");
+    }
+    
+    clog<<"* looking for a valid modeset"<<endl;
+    clog<<"* /dev/dri/card0"<<endl;
+    
+    gpu = new Gpu("/dev/dri/card0");
+    gpu->update();
+    
+    if (gpu->support_dumb_buffer()) {
+        clog<<"* dumb buffer supported"<<endl;
+    }
+    
+    if (gpu->support_vsync()) {
+        clog<<"* vsync supported"<<endl;
+    }
+    
+    vector<Connector> connectors = gpu->get_connectors();
+    
+    connector=nullptr;
+    
+    for (Connector& c:connectors) {
+        if (c.is_connected()) {
+            connector=&c;
+            break;
+        }
+    }
+    
+    if (connector==nullptr) {
+        throw runtime_error("There is no connector");
+    }
+    
+    vector<struct drm_mode_modeinfo> modes = connector->get_modes();
+    
+    if (modes.size()==0) {
+        throw runtime_error("No valid modes for connector");
+    }
+    
+    width=modes[0].hdisplay;
+    height=modes[0].vdisplay;
+    
+    dumbs[0] = new DumbBuffer(*gpu,width,height);
+    dumbs[1] = new DumbBuffer(*gpu,width,height);
+    
+    buffer_id=0;
+    buffer=dumbs[buffer_id];
+    
+    Encoder encoder;
+    Crtc crtc;
+    
+    encoder = connector->get_encoder();
+    crtc = encoder.get_crtc();
+    
+    
+    
+    clog<<"* toggling to graphic tty"<<endl;
+    
+    set_graphic_tty();
 }
 
 void Server::run()
@@ -125,8 +188,14 @@ void Server::run()
         }
     }
 
+    clog<<"* out of main loop"<<endl;
 }
 
+void Server::destroy()
+{
+    clog<<"back to text tty"<<endl;
+    set_text_tty();
+}
 
 void Server::set_graphic_tty()
 {
@@ -140,4 +209,9 @@ void Server::set_text_tty()
     int tty_fd = open("/dev/tty", O_RDWR);
     ioctl(tty_fd,KDSETMODE,KD_TEXT);
     close(tty_fd);
+}
+
+void Server::flip()
+{
+    
 }

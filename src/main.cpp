@@ -1,19 +1,17 @@
 
 
-#include <iostream>
-#include <chrono>
-#include <unistd.h>
-
-
-#include <sys/ioctl.h>
-#include <sys/kd.h>
-#include <fcntl.h>
-
-
 #include "server.hpp"
 #include "gpu.hpp"
 #include "dumb.hpp"
 #include "surface.hpp"
+
+#include <unistd.h>
+#include <sys/ioctl.h>
+#include <sys/kd.h>
+#include <fcntl.h>
+
+#include <iostream>
+#include <chrono>
 
 using namespace std;
 using namespace ds;
@@ -25,7 +23,10 @@ int main(int argc,char* argv[])
 
     Server server;
     
+    server.init("seat0");
     server.run();
+    
+    server.destroy();
     
     /*
     int tty_fd = open("/dev/tty", O_RDWR);

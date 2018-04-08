@@ -1,13 +1,13 @@
 
-
 #ifndef DS_GPU
 #define DS_GPU
+
+#include "connector.hpp"
 
 #include <map>
 #include <string>
 #include <vector>
 
-#include "connector.hpp"
 
 namespace ds
 {
