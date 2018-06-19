@@ -46,20 +46,28 @@ Server::Server()
     struct udev_enumerate *enumerate;
     enumerate = udev_enumerate_new(udev);
     udev_enumerate_add_match_subsystem(enumerate, "drm");
+    udev_enumerate_add_match_property(enumerate,"DEVTYPE","drm_minor");
     
     struct udev_list_entry *devices, *dev_list_entry;
     
     udev_enumerate_scan_devices(enumerate);
     devices = udev_enumerate_get_list_entry(enumerate);
     
-    clog<<"Available gpu:"<<endl;
+    clog<<"* Available gpu:"<<endl;
     udev_list_entry_foreach(dev_list_entry, devices) {
         const char* path = udev_list_entry_get_name(dev_list_entry);
         
-        clog<<"* "<<path<<endl;
+        struct udev_device* dev = udev_device_new_from_syspath(udev,path);
+        
+        string devnode = udev_device_get_devnode(dev);
+        clog<<"    -"<<devnode<<endl;
+        
+        drm_devices.push_back(devnode);
+       
+       udev_device_unref(dev);
     }
     
-    
+    udev_enumerate_unref(enumerate);
 }
 
 Server::~Server()
@@ -82,9 +90,9 @@ void Server::init(string seat)
     }
     
     clog<<"* looking for a valid modeset"<<endl;
-    clog<<"* /dev/dri/card0"<<endl;
+    clog<<"* "<<drm_devices[0]<<endl;
     
-    gpu = new Gpu("/dev/dri/card0");
+    gpu = new Gpu(drm_devices[0]);
     gpu->update();
     
     if (gpu->support_dumb_buffer()) {
@@ -146,6 +154,15 @@ void Server::run()
     fds.fd = libinput_get_fd(libinput);
     fds.events = POLLIN;
     fds.revents = 0;
+    
+    Encoder encoder;
+    Crtc crtc;
+    
+    encoder = connector->get_encoder();
+    crtc = encoder.get_crtc();
+    crtc.add_fb(*connector,*buffer);
+    
+    
 
     while(!quit_request) {
         poll(&fds,1,1);
@@ -186,6 +203,17 @@ void Server::run()
             
             libinput_event_destroy(event);
         }
+        
+        buffer->fill(0xffffffff);
+        buffer->dirty();
+        
+        crtc.page_flip(*buffer);
+        
+        buffer_id++;
+        buffer_id=buffer_id%2;
+        buffer=dumbs[buffer_id];
+        
+        usleep(16000);
     }
 
     clog<<"* out of main loop"<<endl;

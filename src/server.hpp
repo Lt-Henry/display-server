@@ -10,6 +10,7 @@
 #include <libinput.h>
 
 #include <string>
+#include <vector>
 
 namespace ds
 {
@@ -29,6 +30,8 @@ namespace ds
         struct udev* udev;
         struct libinput* libinput;
         struct libinput_interface interface;
+        
+        std::vector<std::string> drm_devices;
         
         drm::Gpu* gpu;
         drm::Connector* connector;
