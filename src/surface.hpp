@@ -55,6 +55,11 @@ namespace ds
             Blits another surface at x,y coordinates
         */
         void blit(Surface& src,int x,int y);
+        
+        /*!
+            Check if data is not corrupted
+        */
+        bool is_good();
     };
 }
 

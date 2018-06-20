@@ -105,20 +105,20 @@ void Server::init(string seat)
     
     vector<Connector> connectors = gpu->get_connectors();
     
-    connector=nullptr;
+    
     
     for (Connector& c:connectors) {
         if (c.is_connected()) {
-            connector=&c;
+            connector=c;
             break;
         }
     }
     
-    if (connector==nullptr) {
+    if (!connector.is_connected()) {
         throw runtime_error("There is no connector");
     }
     
-    vector<struct drm_mode_modeinfo> modes = connector->get_modes();
+    vector<struct drm_mode_modeinfo> modes = connector.get_modes();
     
     if (modes.size()==0) {
         throw runtime_error("No valid modes for connector");
@@ -136,14 +136,14 @@ void Server::init(string seat)
     Encoder encoder;
     Crtc crtc;
     
-    encoder = connector->get_encoder();
+    encoder = connector.get_encoder();
     crtc = encoder.get_crtc();
     
     
     
     clog<<"* toggling to graphic tty"<<endl;
     
-    set_graphic_tty();
+    //set_graphic_tty();
 }
 
 void Server::run()
@@ -158,9 +158,9 @@ void Server::run()
     Encoder encoder;
     Crtc crtc;
     
-    encoder = connector->get_encoder();
+    encoder = connector.get_encoder();
     crtc = encoder.get_crtc();
-    crtc.add_fb(*connector,*buffer);
+    crtc.add_fb(connector,*buffer);
     
     
 
@@ -213,7 +213,7 @@ void Server::run()
         buffer_id=buffer_id%2;
         buffer=dumbs[buffer_id];
         
-        usleep(16000);
+        //usleep(16000);
     }
 
     clog<<"* out of main loop"<<endl;

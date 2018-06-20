@@ -34,7 +34,7 @@ namespace ds
         std::vector<std::string> drm_devices;
         
         drm::Gpu* gpu;
-        drm::Connector* connector;
+        drm::Connector connector;
         
         drm::DumbBuffer* dumbs[2];
         drm::DumbBuffer* buffer;

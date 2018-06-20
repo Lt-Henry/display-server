@@ -28,13 +28,16 @@ Surface::Surface(int width,int height)
 
 Surface::~Surface()
 {
+    destroy();
 }
 
 void Surface::destroy()
 {
-    delete [] data;
+    if (data!=nullptr) {
+        delete [] data;
     
-    data = nullptr;
+        data = nullptr;
+    }
 }
 
 void Surface::fill(uint32_t pixel)
@@ -108,4 +111,9 @@ void Surface::blit(Surface& src,int x,int y)
             dpix[ii]=spix[i];
         }
     }
+}
+
+bool Surface::is_good()
+{
+    return (data!=nullptr);
 }
