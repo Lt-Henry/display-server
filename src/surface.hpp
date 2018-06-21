@@ -36,6 +36,9 @@ namespace ds
         */
         Surface(int width,int height);
         
+        
+        Surface(const char* path);
+        
         /*!
             Default destructor, surface data is not freed here
         */
@@ -54,7 +57,7 @@ namespace ds
         /*!
             Blits another surface at x,y coordinates
         */
-        void blit(Surface& src,int x,int y);
+        void blit(Surface& src,int x,int y,int flags=0);
         
         /*!
             Check if data is not corrupted

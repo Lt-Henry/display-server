@@ -2,6 +2,9 @@
 #include "surface.hpp"
 
 #include <cmath>
+#include <iostream>
+
+#include <png++/png.hpp>
 
 using namespace std;
 using namespace ds;
@@ -24,6 +27,35 @@ Surface::Surface(int width,int height)
     pitch = width*bpp;
     
     data = new uint8_t[width*height*bpp];
+}
+
+Surface::Surface(const char* path)
+{
+    clog<<"loading "<<path<<endl;
+    
+    png::image<png::rgba_pixel> image(path);
+    
+    width = image.get_width();
+    height = image.get_height();
+    
+    clog<<"size "<<width<<"x"<<height<<endl;
+    
+    bpp = 4;
+    pitch = width*bpp;
+    
+    data = new uint8_t[width*height*bpp];
+    
+    for (int j=0;j<height;j++) {
+        for (int i=0;i<width;i++) {
+            png::rgba_pixel pixel = image.get_pixel(i,j);
+            
+            uint8_t* base = data+(i*bpp+j*pitch);
+            base[0] = pixel.blue;
+            base[1] = pixel.green;
+            base[2] = pixel.red;
+            base[3] = pixel.alpha;
+        }
+    }
 }
 
 Surface::~Surface()
@@ -54,7 +86,7 @@ void Surface::fill(uint32_t pixel)
     }
 }
 
-void Surface::blit(Surface& src,int x,int y)
+void Surface::blit(Surface& src,int x,int y,int flags)
 {
     if (x>=width or y>=height) {
         return;
@@ -100,17 +132,37 @@ void Surface::blit(Surface& src,int x,int y)
     int j,jj;
     int i,ii;
     
-    for (j=sy,jj=dy;j<h;j++,jj++) {
-        uint8_t* source = src.data+(src.pitch*j);
-        uint8_t* dest = data+(pitch*jj);
-        
-        for (i=sx,ii=dx;i<w;i++,ii++) {
-            uint32_t* spix=(uint32_t*)source;
-            uint32_t* dpix=(uint32_t*)dest;
+    if (flags==0) {
+    
+        for (j=sy,jj=dy;j<h;j++,jj++) {
+            uint8_t* source = src.data+(src.pitch*j);
+            uint8_t* dest = data+(pitch*jj);
             
-            dpix[ii]=spix[i];
+            for (i=sx,ii=dx;i<w;i++,ii++) {
+                uint32_t* spix=(uint32_t*)source;
+                uint32_t* dpix=(uint32_t*)dest;
+                
+                dpix[ii]=spix[i];
+            }
         }
     }
+    
+    if (flags==1) {
+        for (j=sy,jj=dy;j<h;j++,jj++) {
+            uint8_t* source = src.data+(src.pitch*j);
+            uint8_t* dest = data+(pitch*jj);
+            
+            for (i=sx,ii=dx;i<w;i++,ii++) {
+                uint32_t* spix=(uint32_t*)source;
+                uint32_t* dpix=(uint32_t*)dest;
+                
+                if ((spix[i] & 0x000000ff)>0) {
+                    dpix[ii]=spix[i];
+                }
+            }
+        }
+    }
+    
 }
 
 bool Surface::is_good()

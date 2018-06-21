@@ -10,7 +10,7 @@
 
 #include <iostream>
 #include <stdexcept>
-
+#include <chrono>
 
 using namespace ds;
 using namespace ds::drm;
@@ -163,6 +163,14 @@ void Server::run()
     crtc.add_fb(connector,*buffer);
     
     
+    
+    Surface pointer("dspointer.png");
+    Surface background("dsback.png");
+    
+    auto t0 = std::chrono::steady_clock::now();
+    int fps=0;
+    
+    set_graphic_tty();
 
     while(!quit_request) {
         poll(&fds,1,1);
@@ -173,13 +181,15 @@ void Server::run()
         
         event = libinput_get_event(libinput);
         
+        int32_t key;
+        
         if (event) {
             
             switch (libinput_event_get_type(event)) {
             
                 case LIBINPUT_EVENT_POINTER_MOTION_ABSOLUTE:
-                    pointer_x=libinput_event_pointer_get_absolute_x((libinput_event_pointer*)event);
-                    pointer_y=libinput_event_pointer_get_absolute_y((libinput_event_pointer*)event);
+                    pointer_x=libinput_event_pointer_get_absolute_x_transformed((libinput_event_pointer*)event,width);
+                    pointer_y=libinput_event_pointer_get_absolute_y_transformed((libinput_event_pointer*)event,height);
                     
                     clog<<"absolute "<<pointer_x<<","<<pointer_y<<endl;
                 break;
@@ -192,7 +202,13 @@ void Server::run()
                 break;
                 
                 case LIBINPUT_EVENT_KEYBOARD_KEY:
-                    quit_request=true;
+                    key=libinput_event_keyboard_get_key((libinput_event_keyboard*)event);
+
+                    clog<<"key "<<key<<endl;
+                    
+                    if (key==1) {
+                        quit_request=true;
+                    }
                 break;
                 
                 default:
@@ -204,7 +220,11 @@ void Server::run()
             libinput_event_destroy(event);
         }
         
-        buffer->fill(0xffffffff);
+        //buffer->fill(0xffffffff);
+        buffer->blit(background,0,0);
+        
+        buffer->blit(pointer,pointer_x,pointer_y,1);
+        
         buffer->dirty();
         
         crtc.page_flip(*buffer);
@@ -212,6 +232,18 @@ void Server::run()
         buffer_id++;
         buffer_id=buffer_id%2;
         buffer=dumbs[buffer_id];
+        
+        fps++;
+        auto t1 = std::chrono::steady_clock::now();
+        
+        double delta=std::chrono::duration_cast<std::chrono::milliseconds>(t1-t0).count();
+        
+        if (delta>=1000) {
+            clog<<"fps: "<<fps<<endl;
+            fps=0;
+            t0=std::chrono::steady_clock::now();
+        }
+        //crtc.vsync();
         
         //usleep(16000);
     }
