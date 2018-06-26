@@ -2,6 +2,7 @@
 #ifndef DS_GPU
 #define DS_GPU
 
+#include "drmobject.hpp"
 #include "connector.hpp"
 
 #include <map>
@@ -13,7 +14,7 @@ namespace ds
 {
     namespace drm
     {
-        class Gpu
+        class Gpu : public Object
         {
         
             private:
@@ -23,13 +24,12 @@ namespace ds
             public:
             
             
-            int fd;
-            
             std::vector<uint32_t> fb_ids;
             std::vector<uint32_t> crtc_ids;
             std::vector<uint32_t> encoder_ids;
             std::vector<uint32_t> connector_ids;
             
+            Gpu();
             Gpu(std::string path);
             ~Gpu();
             

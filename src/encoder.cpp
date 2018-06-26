@@ -22,16 +22,14 @@ static const char* names[] =
     "DPI"
 };
 
-Encoder::Encoder()
+Encoder::Encoder() : Object()
 {
-    fd=0;
     id=0;
     type=0;
 }
 
-Encoder::Encoder(int fd,uint32_t id)
+Encoder::Encoder(int fd,uint32_t id) : Object(fd)
 {
-    this->fd=fd;
     this->id=id;
     update();
 }

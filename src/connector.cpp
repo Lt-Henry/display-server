@@ -1,13 +1,14 @@
 
+#include "connector.hpp"
 
-#include <iostream>
+#include <libdrm/drm.h>
+#include <libdrm/drm_mode.h>
 #include <fcntl.h>
 #include <sys/ioctl.h>
 #include <unistd.h>
-#include <libdrm/drm.h>
-#include <libdrm/drm_mode.h>
 
-#include "connector.hpp"
+#include <iostream>
+
 
 using namespace std;
 using namespace ds::drm;
@@ -33,18 +34,16 @@ static const char* names[] = {
     "DPI"
 };
 
-Connector::Connector()
+Connector::Connector() : Object()
 {
-    this->fd=0;
     this->id=0;
     
     connection=3;
     type=0;
 }
 
-Connector::Connector(int fd,uint32_t id)
+Connector::Connector(int fd,uint32_t id) : Object(fd)
 {
-    this->fd=fd;
     this->id=id;
     
     update();

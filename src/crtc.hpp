@@ -2,6 +2,7 @@
 #ifndef DS_CRTC
 #define DS_CRTC
 
+#include "drmobject.hpp"
 #include "dumb.hpp"
 
 #include <cstdint>
@@ -12,11 +13,10 @@ namespace ds
     {
         class Connector;
         
-        class Crtc
+        class Crtc : public Object
         {
             public:
             
-            int fd;
             uint32_t id;
             
             Crtc();

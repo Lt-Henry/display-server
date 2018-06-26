@@ -2,6 +2,7 @@
 #ifndef DS_ENCODER
 #define DS_ENCODER
 
+#include "drmobject.hpp"
 #include "crtc.hpp"
 
 #include <cstdint>
@@ -11,11 +12,10 @@ namespace ds
 {
     namespace drm
     {
-        class Encoder
+        class Encoder : public Object
         {
             public:
             
-            int fd;
             uint32_t id;
             uint32_t type;
             

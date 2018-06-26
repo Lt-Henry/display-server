@@ -14,8 +14,11 @@
 using namespace std;
 using namespace ds::drm;
 
+Gpu::Gpu() : Object()
+{
+}
 
-Gpu::Gpu(string path)
+Gpu::Gpu(string path) : Object()
 {
 
     fd = open(path.c_str(),O_RDWR | O_CLOEXEC);

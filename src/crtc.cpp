@@ -15,15 +15,13 @@ using namespace std;
 using namespace ds::drm;
 
 
-Crtc::Crtc()
+Crtc::Crtc() : Object()
 {
-    fd=0;
     id=0;
 }
 
-Crtc::Crtc(int fd, uint32_t id)
+Crtc::Crtc(int fd, uint32_t id) : Object(fd)
 {
-    this->fd=fd;
     this->id=id;
     
     update();
@@ -65,6 +63,7 @@ void Crtc::page_flip(DumbBuffer& fb)
 
 void Crtc::vsync()
 {
+    // HACK HACK HACK
     char buffer[128];
     int len;
     

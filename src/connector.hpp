@@ -2,22 +2,22 @@
 #ifndef DS_CONNECTOR
 #define DS_CONNECTOR
 
-#include <cstdint>
-#include <vector>
+#include "drmobject.hpp"
+#include "encoder.hpp"
 
 #include <libdrm/drm_mode.h>
 
-#include "encoder.hpp"
+#include <cstdint>
+#include <vector>
 
 namespace ds
 {
     namespace drm
     {
-        class Connector
+        class Connector : public Object
         {
             public:
             
-            int fd;
             uint32_t id;
             
             uint32_t type;
