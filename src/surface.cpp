@@ -18,7 +18,7 @@ Surface::Surface()
     data=nullptr;
 }
 
-Surface::Surface(int width,int height)
+Surface::Surface(uint16_t width,uint16_t height)
 {
     this->width=width;
     this->height=height;

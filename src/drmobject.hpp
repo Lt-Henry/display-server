@@ -21,6 +21,7 @@ namespace ds
             public:
             
             virtual bool is_valid();
+            int get_fd();
             
         };
     }

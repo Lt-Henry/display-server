@@ -22,7 +22,7 @@ DumbBuffer::DumbBuffer()
 DumbBuffer::DumbBuffer(Gpu& gpu,int width,int height)
 {
     
-    fd=gpu.fd;
+    fd=gpu.get_fd();
     
     struct drm_mode_create_dumb create_dumb={0};
     struct drm_mode_map_dumb map_dumb={0};

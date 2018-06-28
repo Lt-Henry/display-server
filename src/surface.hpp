@@ -12,13 +12,13 @@ namespace ds
         public:
         
         /*! width in pixels */
-        uint32_t width;
+        uint16_t width;
         
         /*! height in pixels */
-        uint32_t height;
+        uint16_t height;
         
         /*! bytes per pixel */
-        uint32_t bpp;
+        uint8_t bpp;
         
         /*! pitch in bytes */
         uint32_t pitch;
@@ -34,7 +34,7 @@ namespace ds
         /*!
             Creates a surface with given size
         */
-        Surface(int width,int height);
+        Surface(uint16_t width,uint16_t height);
         
         
         Surface(const char* path);

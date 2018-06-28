@@ -22,3 +22,8 @@ bool drm::Object::is_valid()
 {
     return (fd>=0);
 }
+
+int drm::Object::get_fd()
+{
+    return fd;
+}
